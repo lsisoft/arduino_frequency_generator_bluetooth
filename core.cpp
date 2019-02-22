@@ -1,10 +1,11 @@
 #include <Arduino.h>
 
+#include "Logging.h"
 #include "FrequencyCalculator.h"
 #include "SerialBuffer.h"
 #include "OnOffButton.h"
 
-char outputBuffer[200]; // Handles up to 90 bytes in a c-style string, with a null character termination.
+//#define DEBUG
 
 bool active = false;
 double currentFreq = 5;
@@ -60,9 +61,7 @@ void processBuffer(const char *buffer) {
         sprintf(outputBuffer, "Expecting f30000d10s30, received %s", buffer);
         Serial.println(outputBuffer);
         return;
-    } else {
-        sprintf(outputBuffer, "Sscanf: f%lu d%u s%u", freq, duty, speedSeconds);
-        Serial.println(outputBuffer);
+    } else { LOG("sscanf: f%lu d%u s%u", freq, duty, speedSeconds);
     }
 
     if (duty > 15)
@@ -75,13 +74,11 @@ void processBuffer(const char *buffer) {
     speedFreq = (targetFreq - currentFreq) / (double) speedSeconds;
     speedDuty = (targetDuty - currentDuty) / (double) speedSeconds;
 
-    sprintf(outputBuffer, "debug: f%lu d%d tf%lu td%d sf%ld sd%ldm",
-            (unsigned long) currentFreq, (int) (currentDuty * 100),
-            (unsigned long) targetFreq, (int) (targetDuty * 100),
-            (long) speedFreq, (long) (speedDuty * 1000)
+    LOG("debug: f%lu d%d tf%lu td%d sf%ld sd%ldm",
+        (unsigned long) currentFreq, (int) (currentDuty * 100),
+        (unsigned long) targetFreq, (int) (targetDuty * 100),
+        (long) speedFreq, (long) (speedDuty * 1000)
     );
-
-    Serial.println(outputBuffer);
 }
 
 void ButtonPressed() {
@@ -118,9 +115,8 @@ void loop() {
     unsigned long currentTime = micros();
 
     if (currentTime < lastTime) // after ~50 days there is a reset in micros
-    {
-        sprintf(outputBuffer, "CT%lu LT%lu CT<LT", currentTime, lastTime);
-        Serial.println(outputBuffer);
+    { LOG("CT%lu LT%lu CT<LT", currentTime, lastTime);
+
         lastTime = currentTime;
 
         return;

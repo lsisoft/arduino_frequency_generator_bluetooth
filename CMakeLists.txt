@@ -10,6 +10,8 @@ set(ARDUINO_CPU atmega2560)
 project(${PROJECT_NAME})
 set(${PROJECT_NAME}_SRCS
         core.cpp
+        Logging.h
+        Logging.cpp
         FrequencyCalculator.h
         FrequencyCalculator.cpp
         SerialBuffer.h

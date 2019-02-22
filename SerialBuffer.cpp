@@ -1,7 +1,8 @@
-#include "SerialBuffer.h"
-
 #include <HardwareSerial.h>
 
+#include "SerialBuffer.h"
+
+#include "Logging.h"
 
 SerialBuffer::SerialBuffer(ProcessBufferCallback *callback) : callback(callback) {
     inputBuffer[0] = 0;
@@ -19,7 +20,7 @@ void SerialBuffer::ReadSerialChars() {
         else {
             inputBuffer[s_len] = 0;
 
-            Serial.print("RECEIVED MSG: ");
+            LOG("RECEIVED MSG: ");
             Serial.println(inputBuffer);
 
             callback(inputBuffer);

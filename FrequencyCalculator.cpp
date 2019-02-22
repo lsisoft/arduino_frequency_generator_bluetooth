@@ -1,7 +1,9 @@
 #include "FrequencyCalculator.h"
+#include "Logging.h"
 
 #include <math.h>
 #include <HardwareSerial.h>
+
 
 namespace {
     static const int nscalers = 5;
@@ -22,45 +24,31 @@ FrequencyCalculator::RegCountDuty FrequencyCalculator::frequency(double freq, do
     double log_freq = log(freq) / log(2.);
     double possible_log_scaler = log_master - log_reg - log_freq;
 
-    Serial.print("log_reg ");
-    Serial.println(log_reg);
-    Serial.print(" freq ");
-    Serial.println(freq);
-    Serial.print(" log_freq ");
-    Serial.println(log_freq);
-    Serial.print(" possible_log_scaler ");
-    Serial.println(possible_log_scaler);
+    LOG("log_reg %u freq %u log_freq %u (d) possible_log_scaler %d (d)",
+        log_reg, (unsigned int) freq, (unsigned int) log_freq * 100, (unsigned int) possible_log_scaler * 100);
 
     int idx = 0;
     while (idx < nscalers - 1 && possible_log_scaler > log_scalers[idx]) {
         ++idx;
 
-        Serial.print("idx ");
-        Serial.print(idx);
-        Serial.print(" log_scaler ");
-        Serial.print(log_scalers[idx]);
-        Serial.print(" scaler ");
-        Serial.print(scalers[idx]);
-        Serial.println();
+        LOG("idx %d log_scaler %d scaler %d ", idx, log_scalers[idx], scalers[idx]);
     }
 
+    LOG("final idx %d", idx);
 
-    Serial.print("final idx ");
-    Serial.println(idx);
+    unsigned int count_reg = (int) round(pow(2, 24 - log_scalers[idx] - log_freq));
 
-    unsigned int count_reg = (int)round(pow(2, 24 - log_scalers[idx] - log_freq));
+#ifdef DEBUG
+    double gen_frequency = pow(2, 24 - log_scalers[idx]) / count_reg;
 
-//    double gen_frequency = pow(2, 24 - log_scalers[idx]) / count_reg;
+    LOG("gen_frequency %d", gen_frequency);
+#endif
 
-    Serial.print("duty ");
-    Serial.println(duty);
+    LOG("duty %d (d)", (int) (duty * 100));
 
-    unsigned int duty_reg = (int)round(count_reg * duty);
+    unsigned int duty_reg = (int) round(count_reg * duty);
 
-    Serial.print("count_reg ");
-    Serial.print(count_reg);
-    Serial.print(" duty_reg ");
-    Serial.println(duty_reg);
+    LOG("count_reg %ud duty_reg %ud", count_reg, duty_reg);
 
     return RegCountDuty{count_reg, duty_reg, scalers[idx]};
 }
