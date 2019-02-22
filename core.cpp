@@ -4,6 +4,8 @@
 #include "FrequencyCalculator.h"
 #include "SerialBuffer.h"
 #include "OnOffButton.h"
+#include "PwmChanger.h"
+
 
 //#define DEBUG
 
@@ -28,12 +30,12 @@ int lastState = 0;
 int ledState = 0;
 
 void logStatus() {
-    sprintf(outputBuffer, "%s f %lu d %d count_reg %d duty_reg %d scaler %d",
+    sprintf(Logger::outputBuffer, "%s f %lu d %d count_reg %d duty_reg %d scaler %d",
             active ? "ON " : "OFF",
             (unsigned long) currentFreq, (int) (100 * currentDuty),
             currentRegs.count_reg, currentRegs.duty_reg, currentRegs.scaler);
 
-    Serial.println(outputBuffer);
+    Serial.println(Logger::outputBuffer);
 
     if (active)
         digitalWrite(LED_BUILTIN, HIGH);
@@ -58,10 +60,12 @@ void processBuffer(const char *buffer) {
     }
 
     if (sscanf(buffer, "f%lud%us%u", &freq, &duty, &speedSeconds) != 3) {
-        sprintf(outputBuffer, "Expecting f30000d10s30, received %s", buffer);
-        Serial.println(outputBuffer);
+        // not debug LogDebug
+
+        sprintf(Logger::outputBuffer, "Expecting f30000d10s30, received %s", buffer);
+        Serial.println(Logger::outputBuffer);
         return;
-    } else { LOG("sscanf: f%lu d%u s%u", freq, duty, speedSeconds);
+    } else { LogDebug("sscanf: f%lu d%u s%u", freq, duty, speedSeconds);
     }
 
     if (duty > 15)
@@ -74,10 +78,10 @@ void processBuffer(const char *buffer) {
     speedFreq = (targetFreq - currentFreq) / (double) speedSeconds;
     speedDuty = (targetDuty - currentDuty) / (double) speedSeconds;
 
-    LOG("debug: f%lu d%d tf%lu td%d sf%ld sd%ldm",
-        (unsigned long) currentFreq, (int) (currentDuty * 100),
-        (unsigned long) targetFreq, (int) (targetDuty * 100),
-        (long) speedFreq, (long) (speedDuty * 1000)
+    LogDebug("debug: f%lu d%d tf%lu td%d sf%ld sd%ldm",
+             (unsigned long) currentFreq, (int) (currentDuty * 100),
+             (unsigned long) targetFreq, (int) (targetDuty * 100),
+             (long) speedFreq, (long) (speedDuty * 1000)
     );
 }
 
@@ -89,6 +93,8 @@ void ButtonPressed() {
 SerialBuffer serialBuffer(processBuffer);
 
 OnOffButton onOffButton(52, ButtonPressed);
+
+PwmChanger pwmChanger;
 
 void setup() {
     Serial.begin(9600);
@@ -104,7 +110,6 @@ void setup() {
     logStatus();
 }
 
-
 unsigned long lastTime = UINT32_MAX;
 
 void loop() {
@@ -114,8 +119,8 @@ void loop() {
 
     unsigned long currentTime = micros();
 
-    if (currentTime < lastTime) // after ~50 days there is a reset in micros
-    { LOG("CT%lu LT%lu CT<LT", currentTime, lastTime);
+    if (currentTime < lastTime) { // after ~50 days there is a reset in micros
+        LogDebug("CT%lu LT%lu CT<LT", currentTime, lastTime);
 
         lastTime = currentTime;
 
@@ -154,15 +159,12 @@ void loop() {
             if (change) {
                 currentRegs = frequencyCalculator.frequency(currentFreq, currentDuty);
 
-//            char str_freq[6], str_duty[6];
-//            dtostrf(currentFreq, 6, 0, str_freq);
-//            dtostrf(currentDuty, 1, 2, str_duty);
-
                 logStatus();
+
+                pwmChanger.ApplyRegs(currentRegs);
             }
         }
 
         lastTime = currentTime;
     }
 }
-

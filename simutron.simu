@@ -1,0 +1,31 @@
+<!DOCTYPE SimutronQt4>
+<circuit type="simu">
+ 
+AVR MCU-1: 
+<item x="-28" MCU_model="atmega2560" fcpu_HZ="16000000" labelrot="0" y="-36" Show_id="false" objectName="AVR MCU-1" id="AVR MCU-1" labelx="-40" serial_connections="uart0=AVR Serial Connection-2=/tmp/simavr1-uart0" UART_list="uart3,uart2,uart1,uart0" itemtype="AVR MCU" rotation="0" labely="-284" firmware_elf="/home/l512078/c/freq/cmake-build-debug/t1.elf"/>
+ 
+AVR Serial Connection-2: 
+<item x="-172" Target_UART="uart0" labelrot="0" y="84" Show_id="false" objectName="AVR Serial Connection-2" id="AVR Serial Connection-2" labelx="-24" Target_MCU="AVR MCU-1" itemtype="AVR Serial Connection" rotation="0" Host_PTY="/tmp/simavr1-uart0" labely="-44"/>
+ 
+Push Button-4: 
+<item x="92" labelrot="0" y="-300" Show_id="false" objectName="Push Button-4" id="Push Button-4" labelx="-56" itemtype="Push Button" rotation="0" labely="-8"/>
+ 
+Probe-6: 
+<item x="108" labelrot="45" y="-212" Show_id="false" objectName="Probe-6" id="Probe-6" labelx="8" itemtype="Probe" rotation="-45" labely="-24"/>
+ 
+VCD Probe-8: 
+<item x="-148" labelrot="45" y="-124" Show_id="true" objectName="VCD Probe-8" id="pin2" labelx="8" itemtype="VCD Probe" rotation="-45" labely="-24"/>
+ 
+VCD Trace File-10: 
+<item x="-220" Period="100000" labelrot="0" y="-188" Show_id="false" objectName="VCD Trace File-10" id="VCD Trace File-10" labelx="-8" VCD_file="gtkwave_output.vcd" Overwrite_file="false" itemtype="VCD Trace File" rotation="0" labely="-32"/>
+ 
+Connector-5: 
+<item x="108" startpinid="Push Button-4outnod" labelrot="0" y="-300" Show_id="false" objectName="Connector-5" id="Connector-5" labelx="-8" startpininv="false" pointlist="108,-300,108,-300,108,-276,20,-276" endpinid="AVR MCU-1_Innod-9" itemtype="Connector" rotation="0" endpininv="false" labely="-32"/>
+ 
+Connector-7: 
+<item x="92" startpinid="Probe-6inpin" labelrot="0" y="-196" Show_id="false" objectName="Connector-7" id="Connector-7" labelx="-8" startpininv="false" pointlist="92,-196,92,-196,84,-196,84,-228,20,-228" endpinid="AVR MCU-1_Innod-15" itemtype="Connector" rotation="0" endpininv="false" labely="-32"/>
+ 
+Connector-9: 
+<item x="-164" startpinid="VCD Probe-8inpin" labelrot="0" y="-108" Show_id="false" objectName="Connector-9" id="Connector-9" labelx="-8" startpininv="false" pointlist="-164,-108,-164,-108,-76,-108,-76,-108" endpinid="AVR MCU-1_Innod-36" itemtype="Connector" rotation="0" endpininv="false" labely="-32"/>
+ 
+</circuit>

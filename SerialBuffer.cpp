@@ -20,7 +20,7 @@ void SerialBuffer::ReadSerialChars() {
         else {
             inputBuffer[s_len] = 0;
 
-            LOG("RECEIVED MSG: ");
+            LogDebug("RECEIVED MSG: ");
             Serial.println(inputBuffer);
 
             callback(inputBuffer);

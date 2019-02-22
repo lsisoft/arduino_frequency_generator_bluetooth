@@ -1,4 +1,5 @@
 #include "FrequencyCalculator.h"
+
 #include "Logging.h"
 
 #include <math.h>
@@ -24,31 +25,31 @@ FrequencyCalculator::RegCountDuty FrequencyCalculator::frequency(double freq, do
     double log_freq = log(freq) / log(2.);
     double possible_log_scaler = log_master - log_reg - log_freq;
 
-    LOG("log_reg %u freq %u log_freq %u (d) possible_log_scaler %d (d)",
+    LogDebug("log_reg %u freq %u log_freq %u (d) possible_log_scaler %d (d)",
         log_reg, (unsigned int) freq, (unsigned int) log_freq * 100, (unsigned int) possible_log_scaler * 100);
 
     int idx = 0;
     while (idx < nscalers - 1 && possible_log_scaler > log_scalers[idx]) {
         ++idx;
 
-        LOG("idx %d log_scaler %d scaler %d ", idx, log_scalers[idx], scalers[idx]);
+        LogDebug("idx %d log_scaler %d scaler %d ", idx, log_scalers[idx], scalers[idx]);
     }
 
-    LOG("final idx %d", idx);
+    LogDebug("final idx %d", idx);
 
     unsigned int count_reg = (int) round(pow(2, 24 - log_scalers[idx] - log_freq));
 
 #ifdef DEBUG
     double gen_frequency = pow(2, 24 - log_scalers[idx]) / count_reg;
 
-    LOG("gen_frequency %d", gen_frequency);
+    LogDebug("gen_frequency %d", gen_frequency);
 #endif
 
-    LOG("duty %d (d)", (int) (duty * 100));
+    LogDebug("duty %d (d)", (int) (duty * 100));
 
     unsigned int duty_reg = (int) round(count_reg * duty);
 
-    LOG("count_reg %ud duty_reg %ud", count_reg, duty_reg);
+    LogDebug("count_reg %ud duty_reg %ud", count_reg, duty_reg);
 
     return RegCountDuty{count_reg, duty_reg, scalers[idx]};
 }

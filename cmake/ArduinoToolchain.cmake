@@ -53,15 +53,18 @@ if(NOT ARDUINO_SDK_PATH)
     endforeach()
 
     if(UNIX)
-        file(GLOB SDK_PATH_HINTS /usr/share/arduino*
-            /opt/local/arduino*
-            /opt/arduino*
-            /usr/local/share/arduino*)
+        file(GLOB SDK_PATH_HINTS
+                $ENV{HOME}/c/arduino-sdk
+                $ENV{HOME}/Downloads/arduino-1.8.8
+                /usr/share/arduino*
+                /opt/local/arduino*
+                /opt/arduino*
+                /usr/local/share/arduino*)
     elseif(WIN32)
         set(SDK_PATH_HINTS
-#                "C:\\Program Files\\Arduino"
-#            "C:\\Program Files (x86)\\Arduino"
                 "C:\\arduino-1.8.8"
+                "C:\\Program Files\\Arduino"
+                "C:\\Program Files (x86)\\Arduino"
             )
     endif()
     list(SORT SDK_PATH_HINTS)

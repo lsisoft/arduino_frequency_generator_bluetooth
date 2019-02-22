@@ -17,16 +17,32 @@ set(${PROJECT_NAME}_SRCS
         SerialBuffer.h
         SerialBuffer.cpp
         OnOffButton.h
+        PwmChanger.h
         )
 
 # set(${PROJECT_NAME}_HDRS)
- set(${PROJECT_NAME}_LIBS libscanf_flt.a)
+set(${PROJECT_NAME}_LIBS libscanf_flt.a)
 # link_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
 # add_subdirectory()
 #set(${PROJECT_NAME}_SKETCH t1.ino)
 
 set(${PROJECT_NAME}_PROGRAMMER avrdude)
-set(${PROJECT_NAME}_PORT COM6)
+
+message(DEBUG system_${CMAKE_HOST_SYSTEM_NAME}_)
+
+if (${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Linux")
+    message(DEBUG Linux)
+    set(${PROJECT_NAME}_PORT /dev/ttyACM0)
+elseif (${CMAKE_HOST_SYSTEM_NAME} EQUAL Windows)
+    message(DEBUG Windows)
+    set(${PROJECT_NAME}_PORT COM6)
+else ()
+    message(DEBUG platform default)
+    set(${PROJECT_NAME}_PORT COM6)
+endif ()
+
+message(DEBUG ${${PROJECT_NAME}_PORT})
+
 set(${PROJECT_NAME}_AFLAGS -v)
 set(mega.upload.speed 115200)
 

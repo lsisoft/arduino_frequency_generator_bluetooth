@@ -1,3 +1,4 @@
 #pragma once
+#include "Logging.h"
 
-char outputBuffer[200];
+char Logger::outputBuffer[200];
