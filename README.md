@@ -1,5 +1,17 @@
 # arduino_frequency_generator_bluetooth
-Arduino frequency generator for (0.25HZ...1Hz..4Mhz)
+Arduino frequency generator for (1Hz ... 4Mhz)
+
+All frequencies we can request are integers.
+
+The PWM driving method allows for frequencies of less then 1Hz but this
+application serial language is not designed for it.
+
+## Reference
+Please see fast_pwm_reference.ino about how the PWM is driven. The reference
+shows using 3 PWM 16 bit timers, on Fast PWM, with an attempt of synchronization.
+
+For applications requiring more PWM pins with variable frequency, probably
+the whole 6 PWM timers could be used, each driving its own pin.  
 
 ## Installation
 
