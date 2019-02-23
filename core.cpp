@@ -1,36 +1,53 @@
 #include <Arduino.h>
 
+#define __DEBUG__
+//#define __USE_BUTTON__
+
+#define LIMIT_DUTY_BY_FREQ(duty, freq) if (freq<1000 && duty>15) duty=15;
+//#define LIMIT_DUTY_BY_FREQ(duty, freq) ;
+
 #include "Logging.h"
 #include "FrequencyCalculator.h"
 #include "SerialBuffer.h"
 #include "OnOffButton.h"
 #include "PwmChanger.h"
 
-
-//#define DEBUG
-
 bool active = false;
-double currentFreq = 5;
-double currentDuty = .1;
+
+double currentFreq = 20;
+double currentDuty = .01;
+
+
 double targetFreq = currentFreq;
 double targetDuty = currentDuty;
 double speedFreq = 0;
 double speedDuty = 0;
 
-
 FrequencyCalculator frequencyCalculator;
 FrequencyCalculator::RegCountDuty currentRegs{0, 0, 0};
 
-// constants won't change. They're used here to set pin numbers:
-const int buttonPin = 52;    // the number of the pushbutton pin
-const int ledPin = 13;      // the number of the LED pin
+void processBuffer(const char *buffer);
 
-// variables will change:
-int lastState = 0;
-int ledState = 0;
+SerialBuffer serialBuffer(processBuffer);
+PwmChanger pwmChanger;
+
+#ifdef __USE_BUTTON__
+
+void ButtonPressed() {
+    active = !active;
+    logStatus();
+}
+
+void ButtonDisabled() {
+    active = false;
+    logStatus();
+}
+OnOffButton onOffButton(52, ButtonPressed, ButtonDisabled);
+#endif
+
 
 void logStatus() {
-    sprintf(Logger::outputBuffer, "%s f %lu d %d count_reg %d duty_reg %d scaler %d",
+    sprintf(Logger::outputBuffer, "%s f %lu d %d count_reg %u duty_reg %u scaler %u",
             active ? "ON " : "OFF",
             (unsigned long) currentFreq, (int) (100 * currentDuty),
             currentRegs.count_reg, currentRegs.duty_reg, currentRegs.scaler);
@@ -49,12 +66,18 @@ void processBuffer(const char *buffer) {
 
     if (!strcmp(buffer, "on")) {
         active = true;
+
+        currentRegs = frequencyCalculator.frequency(currentFreq, currentDuty);
+        pwmChanger.ApplyRegs(currentRegs);
         logStatus();
         return;
     }
 
     if (!strcmp(buffer, "off")) {
         active = false;
+
+        currentRegs.duty_reg = 0;
+        pwmChanger.ApplyRegs(currentRegs);
         logStatus();
         return;
     }
@@ -65,11 +88,11 @@ void processBuffer(const char *buffer) {
         sprintf(Logger::outputBuffer, "Expecting f30000d10s30, received %s", buffer);
         Serial.println(Logger::outputBuffer);
         return;
-    } else { LogDebug("sscanf: f%lu d%u s%u", freq, duty, speedSeconds);
+    } else {
+        LogDebug("sscanf: f%lu d%u s%u", freq, duty, speedSeconds);
     }
 
-    if (duty > 15)
-        duty = 15;
+    LIMIT_DUTY_BY_FREQ(duty, freq);
 
     targetFreq = freq;
     targetDuty = duty / 100.;
@@ -85,35 +108,27 @@ void processBuffer(const char *buffer) {
     );
 }
 
-void ButtonPressed() {
-    active = !active;
-    logStatus();
-}
-
-SerialBuffer serialBuffer(processBuffer);
-
-OnOffButton onOffButton(52, ButtonPressed);
-
-PwmChanger pwmChanger;
-
 void setup() {
     Serial.begin(9600);
-
-    frequencyCalculator.frequency(1e6, .10);
-    frequencyCalculator.frequency(10, .10);
 
     pinMode(LED_BUILTIN, OUTPUT);
 
     currentRegs = frequencyCalculator.frequency(currentFreq, currentDuty);
 
     Serial.println("INIT");
+
+    if (!active)
+        currentRegs.duty_reg = 0;
     logStatus();
+    pwmChanger.ApplyRegs(currentRegs);
 }
 
 unsigned long lastTime = UINT32_MAX;
 
 void loop() {
+#ifdef __USE_BUTTON__
     onOffButton.CheckButton();
+#endif
 
     serialBuffer.ReadSerialChars();
 
@@ -135,6 +150,7 @@ void loop() {
         if (active) {
 
             double deltaTime = min(currentTime - lastTime, 2 * sliceTime);// min to prevent errors
+            lastTime = currentTime;
             deltaTime /= 1e6; //speed is per second
 
             if (speedFreq != 0) {
@@ -160,11 +176,8 @@ void loop() {
                 currentRegs = frequencyCalculator.frequency(currentFreq, currentDuty);
 
                 logStatus();
-
                 pwmChanger.ApplyRegs(currentRegs);
             }
         }
-
-        lastTime = currentTime;
     }
 }

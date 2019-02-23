@@ -17,11 +17,10 @@ void SerialBuffer::ReadSerialChars() {
             // Ignore all new input until line termination occurs
         } else if (input != '\n' && input != '\r')
             inputBuffer[s_len++] = input;
-        else {
+        else if (s_len > 0) { // ignore new line or \r as first caracter of new line
             inputBuffer[s_len] = 0;
 
-            LogDebug("RECEIVED MSG: ");
-            Serial.println(inputBuffer);
+//            LogDebug("RECEIVED MSG: %s", inputBuffer);
 
             callback(inputBuffer);
 

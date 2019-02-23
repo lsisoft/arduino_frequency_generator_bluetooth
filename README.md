@@ -30,6 +30,7 @@ configuration which will do the upload to Arduino.
 
 The PWM will be generated on pin 2.
 On pin 52 you an add a button, with a pull-up resistor on 5V.
+This on off button can be disabled from core.cpp, commenting out `#define __USE_BUTTON__`
 
 The generator works with a relatively verbose system on Serial
 (or bluetooth module if connected on RX/TX).
