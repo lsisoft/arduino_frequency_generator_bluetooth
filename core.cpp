@@ -47,11 +47,12 @@ OnOffButton onOffButton(52, ButtonPressed, ButtonDisabled);
 
 
 void logStatus() {
-    sprintf(Logger::outputBuffer, "%s f %lu d %d count_reg %u duty_reg %u scaler %u gen_freq %lu (.1khz)",
+    sprintf(Logger::outputBuffer, "%s f%lu d%d cr%u dr %u sc%u gen_freq %lu (.1khz) dt%lu (x100p)",
             active ? "ON " : "OFF",
             (unsigned long) currentFreq, (int) (100 * currentDuty),
             currentRegs.count_reg, currentRegs.duty_reg, currentRegs.scaler,
-            (unsigned long) (100.*currentRegs.gen_frequency)
+            (unsigned long) (100.*currentRegs.gen_frequency),
+            (unsigned long) (10000.*currentRegs.duty_reg/currentRegs.count_reg)
             );
 
     Serial.println(Logger::outputBuffer);
