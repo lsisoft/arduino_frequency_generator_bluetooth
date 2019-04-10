@@ -46,17 +46,18 @@ FrequencyCalculator::RegCountDuty FrequencyCalculator::frequency(double freq, do
         count_reg = 2;
     }
 
-#ifdef __DEBUG__
-    char str_frequency[10];
     double gen_frequency = pow(2, log_master - log_scalers[idx]) / count_reg;
-    dtostrf(gen_frequency, 7, 2, str_frequency);
 
-    LogDebug("gen_frequency %s", str_frequency);
-#endif
+//#ifdef __DEBUG__
+//    char str_frequency[10];
+//    dtostrf(gen_frequency, 7, 2, str_frequency);
+//
+//    LogDebug("gen_frequency %s", str_frequency);
+//#endif
 
     unsigned int duty_reg = (unsigned int) round(count_reg * duty);
     if (duty_reg == 0)
         duty_reg = 1;
 
-    return RegCountDuty{count_reg, duty_reg, scalers[idx]};
+    return RegCountDuty{count_reg, duty_reg, scalers[idx], gen_frequency};
 }

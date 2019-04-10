@@ -3,8 +3,8 @@
 #define __DEBUG__
 //#define __USE_BUTTON__
 
-#define LIMIT_DUTY_BY_FREQ(duty, freq) if (freq<1000 && duty>15) duty=15;
-//#define LIMIT_DUTY_BY_FREQ(duty, freq) ;
+//#define LIMIT_DUTY_BY_FREQ(duty, freq) if (freq<1000 && duty>15) duty=15;
+#define LIMIT_DUTY_BY_FREQ(duty, freq) ;
 
 #include "Logging.h"
 #include "FrequencyCalculator.h"
@@ -47,10 +47,12 @@ OnOffButton onOffButton(52, ButtonPressed, ButtonDisabled);
 
 
 void logStatus() {
-    sprintf(Logger::outputBuffer, "%s f %lu d %d count_reg %u duty_reg %u scaler %u",
+    sprintf(Logger::outputBuffer, "%s f %lu d %d count_reg %u duty_reg %u scaler %u gen_freq %lu (.1khz)",
             active ? "ON " : "OFF",
             (unsigned long) currentFreq, (int) (100 * currentDuty),
-            currentRegs.count_reg, currentRegs.duty_reg, currentRegs.scaler);
+            currentRegs.count_reg, currentRegs.duty_reg, currentRegs.scaler,
+            (unsigned long) (100.*currentRegs.gen_frequency)
+            );
 
     Serial.println(Logger::outputBuffer);
 
@@ -142,7 +144,7 @@ void loop() {
         return;
     }
 
-    const double sliceTime = 100e3;
+    const double sliceTime = 20e3;
 
     if (currentTime - lastTime >= sliceTime) // 100 millisecond
     {
